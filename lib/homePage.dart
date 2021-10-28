@@ -19,7 +19,7 @@ class HomePageState extends State<HomePageApp> {
 
       body: Center(
         child: Text(
-            "You have signed up successfully"
+            "Hello Deriv"
         ),
       ),
     );

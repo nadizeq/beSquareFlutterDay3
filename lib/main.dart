@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'homePage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,6 +31,52 @@ class MainPageState extends State<MainPageApp> {
   List genderList = [
     "Male","Female","Other","Rather not to say",
   ];
+
+  final _textName = TextEditingController();
+  final _textEmail = TextEditingController();
+  final _textPassword = TextEditingController();
+  bool _validate = false;
+  bool _validateUserSignUp = false;
+
+  @override
+  void initState(){
+    retrieveUserAcc ();
+    _textName.addListener(_enableORdisableBtn);
+    _textEmail.addListener(_enableORdisableBtn);
+    _textPassword.addListener(_enableORdisableBtn);
+    super.initState();
+  }
+
+  retrieveUserAcc () async {
+    SharedPreferences prefs =
+    await SharedPreferences.getInstance();
+    setState(() {
+      _validate = prefs.getBool('validate')??false;
+    });
+
+    if (_validate){
+      Navigator.of(context).push(_goToHomePage());
+    }
+  }
+
+  updateUserAcc () async{
+    SharedPreferences prefs =
+    await SharedPreferences.getInstance();
+    prefs.setBool('validate', true);
+    _validate = true;
+  }
+  void _enableORdisableBtn (){
+    setState(() {
+      if (_textName.text.isNotEmpty &&
+          _textEmail.text.isNotEmpty &&
+      _textPassword.text.isNotEmpty){
+        _validate = true;
+      }
+      else{
+        _validate = false;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,14 +115,17 @@ class MainPageState extends State<MainPageApp> {
     );
 
     TextField inputName = new TextField(
+      controller: _textName,
       decoration: InputDecoration(
         hintText: 'Enter Name',
         border: OutlineInputBorder(),
         icon: Icon(Icons.send_sharp),
+
       ),
     );
 
     TextField inputEmail = new TextField(
+      controller: _textEmail,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         hintText: 'Enter Email Address',
@@ -85,11 +135,13 @@ class MainPageState extends State<MainPageApp> {
     );
 
     TextField inputPassword = new TextField(
+      controller: _textPassword,
       obscureText: true,
       decoration: InputDecoration(
         hintText: 'Enter Password',
         border: OutlineInputBorder(),
         icon: Icon(Icons.password),
+
       ),
     );
 
@@ -121,26 +173,31 @@ class MainPageState extends State<MainPageApp> {
           children: [
             new Expanded(child: OutlinedButton(
               child: new Text(
-                "Main Page",
+                "Sign Up",
                 style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.bold),
               ),
-              onPressed: (){
-                //Navigator.of(context).push(_goToHomePage());
+              onPressed: !_validate? null : (){
+                updateUserAcc();
                 final snackBar = SnackBar(
-                  content: const Text('You have signed up successfully!'),
+                  content: const Text('Yay! A SnackBar!'),
                   action: SnackBarAction(
-                    label: 'OK', onPressed: () {
-                    Navigator.of(context).push(_goToHomePage());
-                  },
+                    label: 'OK',
+                    onPressed: () {
+                      if (_validate){
+                        Navigator.of(context).push(_goToHomePage());
+                      }
+                    },
                   ),
                 );
 
                 // Find the ScaffoldMessenger in the widget tree
                 // and use it to show a SnackBar.
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              },
+                },
+                //Navigator.of(context).push(_goToHomePage());
+
               style: OutlinedButton.styleFrom(
                   padding: EdgeInsets.all(10),
                   side: BorderSide(
@@ -161,7 +218,7 @@ class MainPageState extends State<MainPageApp> {
       resizeToAvoidBottomInset: false,
       appBar: header,
       body: Container(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(10.0),
         child: Column(
           children: <Widget>[
             topText,
